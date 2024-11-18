@@ -1,0 +1,24 @@
+import pandas as pd
+
+# Load the CSV file
+df = pd.read_csv('social_media_interactions_contaminated.csv')
+
+# Display the initial DataFrame
+print("Initial DataFrame:")
+print(df)
+
+# Remove rows with any missing values or zeros
+df_cleaned_rows = df[(df != 0).all(axis=1) & df.notna().all(axis=1)]
+
+# Remove columns with any missing values or zeros
+df_cleaned_columns = df.loc[:, (df != 0).all(axis=0) & df.notna().all(axis=0)]
+
+# Print the DataFrames after removing missing values and zeros
+print("\nDataFrame after removing rows with missing values or zeros:")
+print(df_cleaned_rows.to_string())
+
+print("\nDataFrame after removing columns with missing values or zeros:")
+print(df_cleaned_columns.to_string())
+
+# Optionally, save the cleaned DataFrames back to CSV files
+df_cleaned_rows.to_csv('social_media_interactions_cleaned.csv', index=False)
