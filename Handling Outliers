@@ -1,0 +1,48 @@
+import pandas as pd
+
+# Load the CSV file
+df = pd.read_csv('social_media_interactions_cleaned.csv')
+
+# Display the initial DataFrame
+print("Initial DataFrame:")
+print(df)
+
+# Function to cap outliers using the IQR method
+def cap_outliers_iqr(data):
+    Q1 = data.quantile(0.25)
+    Q3 = data.quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    # Cap the outliers
+    data_capped = data.clip(lower=lower_bound, upper=upper_bound)
+    return data_capped
+
+# Identify numerical columns for outlier capping
+numeric_columns = df.select_dtypes(include=['number']).columns
+
+# Cap outliers in numerical columns
+for column in numeric_columns:
+    df[column] = cap_outliers_iqr(df[column])
+    print(f"\nCapped outliers in '{column}':")
+    print(df[column])
+
+# Save the DataFrame with capped outliers back to a CSV file
+df.to_csv('social_media_interactions_capped.csv', index=False)
+print("\nDataFrame with capped outliers has been saved to 'social_media_interactions_capped.csv'.")
+
+# Basic statistics for numeric variables
+numeric_stats = df[numeric_columns].describe().loc[['mean', '50%', 'min', 'max']]
+numeric_stats.rename(index={'50%': 'median'}, inplace=True)
+print("\nBasic statistics for numeric variables:")
+print(numeric_stats)
+
+# Frequency counts for categorical variables
+categorical_columns = df.select_dtypes(include=['object', 'category']).columns
+if len(categorical_columns) == 0:
+    print("\nNo categorical variables found in the DataFrame.")
+else:
+    for column in categorical_columns:
+        print(f"\nFrequency counts for categorical variable '{column}':")
+        print(df[column].value_counts())
